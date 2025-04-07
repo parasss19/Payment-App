@@ -3,6 +3,7 @@ const zod = require("zod");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 
+const userMiddleware = require("../middlewares/userMiddleware");
 const {UserModal, AccountModal} = require('../db/db');
 
 const router = Router();
@@ -19,6 +20,13 @@ const signinValidation = zod.object({
     username: zod.string().trim().email(),
     password: zod.string().trim().min(6),
 });
+
+const updateValidation = zod.object({
+    newFirstName: zod.string().trim().optional(),
+    newPassword: zod.string().trim().optional(),
+    newusername: zod.string().trim().email().optional(),
+});
+
 
 
 //[auth routes]
@@ -119,4 +127,121 @@ router.post("/signin", async (req, res) => {
     }
 });
   
+//[User Route]
+
+//Route to update user information : route = /api/v1/user/updateInfo
+router.patch("/updateInfo", userMiddleware, async (req, res) => {
+    const createPayload = req.body;
+    const parsePayload = updateValidation.safeParse(createPayload);
   
+    //if zod validation fails
+    if (!parsePayload.success) {
+      return res.status(411).json({
+        msg: "Error while updating information",
+      });
+    }
+  
+    //extract values from req.body
+    const { newFirstName, newusername, newPassword } = req.body;
+  
+    //this obj store all updated values
+    const updatedFields = {};
+  
+    //Only add fields to update if they are not undefined or empty
+    if (newFirstName) updatedFields.firstName = newFirstName;
+    if (newusername) updatedFields.username = newusername;
+    if (newPassword) {
+      const hashedPass = await bcrypt.hash(newPassword, 10);
+      updatedFields.password = hashedPass;
+    }
+  
+    //if updatedFields have no input
+    if (Object.keys(updatedFields).length === 0) {
+      return res.json({ msg: "No input received" });
+    }
+  
+    const userId = req.userId;
+  
+    try {
+      //find the user using userId
+      const existingUser = await UserModal.findOne({
+        $or: [  
+          { userName: newusername },   //find user through their username(email) which is unique for every user
+        ],
+        _id: { $ne: userId }, //exclude current user
+      });
+  
+      //if user already present
+      if (existingUser) {
+        if (newFirstName == existingUser.firstName) {
+          return res.json({ msg: "Firstname already taken. Choose another" });
+        }
+        if (newusername == existingUser.username) {
+          return res.json({ msg: "Email already taken. Choose another" });
+        }
+      }
+      else {
+        await UserModal.findByIdAndUpdate(userId, { $set: updatedFields } );
+        return res.status(200).json({
+          msg: "Updated info successfully",
+        });
+      }
+    } catch (error) {
+      return res.json({msg: "Error while updating",error: error.message})
+    }
+});
+
+
+//Route to get users from db : route = /api/v1/user/filterUser
+router.get("/filterUser", userMiddleware, async (req, res) => {
+    //we send filter query in req obj
+    const filter = req.query.filter || "";
+    //console.log("Filter received:", filter);
+  
+    try {
+      //if filter is not applied than show all users in dashboard
+      if (!filter) {
+        const allusers = await UserModal.find({
+          _id: { $ne: req.userId },
+        });
+        return res.json({ allusers });
+      }
+  
+      //now if filter is applied than search the user in db using firstName
+      const user = await UserModal.find(
+        { 
+          firstName: { 
+            $regex: filter, 
+            $options: "i" 
+          }
+        })
+      console.log(user);
+      
+      //if the filter user not found in db
+      if (user.length === 0) {
+        return res.json({
+          msg: "No matching user Found",
+        });
+      }
+  
+      //if the filter user found in db then get filtered user
+      const filterdUsers = user.map((user) => ({
+        username: user.username,
+        firstName: user.firstName,
+        lastName: user.lastName,
+      }));
+  
+      //send filterdUsers with our response
+      return res.status(200).json({
+        user: filterdUsers,
+      });
+    }
+    catch (error) {
+      return res.status(500).json({
+        error : "Error occurred while fetching users",
+      });
+    }
+});
+
+
+module.exports = router  
