@@ -28,5 +28,26 @@ router.get("/receiverdetails/:userId", userMiddleware, async (req, res) => {
 });
   
 
+//An endpoint for user to get their balance. route = /api/v1/account/balance
+router.get("/balance", userMiddleware, async (req, res) => {
+    const userId = req.userId;
+    try {
+      const account = await AccountModal.findOne({ userId: req.userId }).populate( "userId");
+      //console.log(account);
+      return res.json({
+        msg: "Successfully fetch balance",
+        balance: account.balance,
+        firstName: account.userId.firstName,
+      });
+    } catch (error) {
+      return res.json({
+        msg: "Error in fetching balance",
+        balance: null,
+      });
+    }
+});
+
+
+
 
 module.exports = router;
