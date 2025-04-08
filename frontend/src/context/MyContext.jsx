@@ -18,7 +18,7 @@ const MyProvider = ({children}) => {
       if(!token){
         return console.log("No token found")
       }
-      const response = await axios.get('http://localhost:3000/api/v1/account/balance',{
+      const response = await axios.get(`${import.meta.env.VITE_URL}/api/v1/account/balance`, {
         headers: {
           Authorization: `Bearer ${token}`    //send token while requesting for balance and user details from server
         }
@@ -39,7 +39,7 @@ const MyProvider = ({children}) => {
       if(!token){
         return console.log("No token found")
       }
-      const response = await axios.get('http://localhost:3000/api/v1/user/filterUser',{
+      const response = await axios.get(`${import.meta.env.VITE_URL}/api/v1/user/filterUser`,{
         headers: {
           Authorization: `Bearer ${token}`    //send token while requesting for balance from server
         }
