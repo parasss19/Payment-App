@@ -3,7 +3,7 @@ const zod = require("zod");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 
-const userMiddleware = require("../middlewares/userMiddleware");
+const userMiddleware = require("../middleware/userMiddleware");
 const {UserModal, AccountModal} = require('../db/db');
 
 const router = Router();
