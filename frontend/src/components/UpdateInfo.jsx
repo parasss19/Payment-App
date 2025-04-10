@@ -1,4 +1,4 @@
-import React, { useContext } from 'react'
+import React, { useContext, useState } from 'react'
 import { Button } from "./ui/button";
 import { toast } from "react-toastify";
 
@@ -14,7 +14,7 @@ import { MyContext } from '@/context/MyContext';
 import { Eye, EyeOff } from 'lucide-react';
 
 
-const UpdateInfo = () => {
+const UpdateInfo = ({ showupdateinfo, setshowupdateinfo }) => {
   const [newFirstName, setNewFirstName] = useState("");
   const [newusername, setNewUsername] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -28,7 +28,7 @@ const UpdateInfo = () => {
 
   return (
     <>
-      <Dialog>
+      <Dialog open={showupdateinfo} onOpenChange={setshowupdateinfo}>
         <DialogContent>
             {/* Header */}
             <DialogHeader>

@@ -5,6 +5,7 @@ import { Button } from './ui/button';
 import { DropdownMenu, DropdownMenuContent,DropdownMenuItem,DropdownMenuTrigger} from "./ui/dropdown-menu";
 import { CircleUser, HomeIcon, LogOut } from 'lucide-react';
 import { toast } from "react-toastify";
+import UpdateInfo from './UpdateInfo';
 
 const Header = () => {
   const [showupdateinfo, setshowupdateinfo] = useState(false);    //used for showing update info modal
@@ -75,6 +76,8 @@ const Header = () => {
         </div>
       </nav>
 
+      {/* Update Dialog modal rendered */}
+      <UpdateInfo showupdateinfo={showupdateinfo} setshowupdateinfo={setshowupdateinfo} />
 
     </div>
   )
