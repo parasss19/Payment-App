@@ -1,8 +1,10 @@
-import { Button } from '@/components/ui/button';
-import { MyContext } from '@/context/MyContext';
 import React, { useContext, useState } from 'react'
+import { MyContext } from '@/context/MyContext';
+import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
+import axios from 'axios';
+import { toast } from 'react-toastify';
 
 
 const Signup = () => {
@@ -36,8 +38,43 @@ const Signup = () => {
     ))
   }
 
+  //handle submit
   const handleSubmit = async () => {
-     
+    //validation check
+    const result = signupValidation.safeParse(formData);
+
+    //if validation fail
+    if(!result.success){
+      const formattedErrors = result.error.flatten().fieldErrors;
+      setErrors(formattedErrors);
+      return;
+    }
+
+    //if validation succeed then send post req for signup to backend server
+    try {
+      setErrors([]);
+      const response = await axios.post(`${import.meta.env.VITE_URL}/api/v1/user/signup`, 
+        JSON.stringify(formData),   //Ensure it's sent as JSON
+        {
+          headers: {"Content-Type": "application/json"}
+        }
+      )
+
+      const token = response.data.token;
+
+      if(token){
+        localStorage.setItem('token', response.data.token);    //store jwt token in localstorage
+        await fetchData();
+        await fetchUsers();
+        toast.success(response.data.msg)
+        navigate("/dashboard");
+      }else{
+        toast(response.data.msg)
+      }
+    } 
+    catch (error) {
+      toast.error(error.response.data.error)
+    }
   }
 
 
@@ -110,7 +147,7 @@ const Signup = () => {
               )}
             </label>
 
-            <Button onClick = {handleSubmit} className= 'font-[poppins] sm:text-xl sm:p-5 text-center'>Signup</Button>
+            <Button onClick = {handleSubmit} className= 'cursor-pointer font-[poppins] sm:text-xl sm:p-5 text-center'>Signup</Button>
           </div>
         </div> 
 
