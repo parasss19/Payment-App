@@ -1,10 +1,13 @@
 import { MyContext } from '@/context/MyContext';
-import React, { useContext } from 'react'
+import React, { useContext, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Button } from './ui/button';
-
+import { DropdownMenu, DropdownMenuContent,DropdownMenuItem,DropdownMenuTrigger} from "./ui/dropdown-menu";
+import { CircleUser, HomeIcon, LogOut } from 'lucide-react';
+import { toast } from "react-toastify";
 
 const Header = () => {
+  const [showupdateinfo, setshowupdateinfo] = useState(false);    //used for showing update info modal
   const navigate = useNavigate();
   const { user, setUser, firstName } = useContext(MyContext);
 
@@ -29,7 +32,39 @@ const Header = () => {
               Dashboard
             </Button>
 
+            <DropdownMenu>
+              <DropdownMenuTrigger className='bg-gray-400 rounded-full px-3 py-1 sm:px-4 sm:py-2'>
+                <span className='cursor-pointer sm:text-2xl font-[poppins] font-semibold'>
+                  {firstName.charAt(0)}
+                </span>
+              </DropdownMenuTrigger>
 
+              <DropdownMenuContent className='mr-3'>
+                <DropdownMenuItem className="cursor-pointer">
+                  <HomeIcon className="mr-2 h-4 w-4" />
+                    <span onClick={() => navigate("/")}> Home </span>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem onClick={() => setshowupdateinfo(true)} className="cursor-pointer">
+                  <CircleUser className="mr-2 h-4 w-4" />
+                  <span > Update Info</span>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem className="cursor-pointer text-red-400">
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <Link
+                    onClick={async () => {
+                      localStorage.clear();
+                      toast.success("Logged Out Successfully");
+                      setUser(false);
+                      navigate("/");
+                    }}
+                  >
+                    Logout
+                  </Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
          ) : (
           <>
@@ -40,7 +75,7 @@ const Header = () => {
         </div>
       </nav>
 
-      
+
     </div>
   )
 }
