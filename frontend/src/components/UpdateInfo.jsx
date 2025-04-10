@@ -12,6 +12,7 @@ import {
 } from "./ui/dialog";
 import { MyContext } from '@/context/MyContext';
 import { Eye, EyeOff } from 'lucide-react';
+import axios from 'axios';
 
 
 const UpdateInfo = ({ showupdateinfo, setshowupdateinfo }) => {
@@ -23,7 +24,29 @@ const UpdateInfo = ({ showupdateinfo, setshowupdateinfo }) => {
   const { setfirstName } = useContext(MyContext);
   
   const handleSubmit = async () => {
-    
+    try {
+        const token = localStorage.getItem('token');
+        const response = await axios.patch(`${import.meta.env.VITE_URL}/api/v1/user/updateInfo` , {
+            newFirstName,
+            newusername,
+            newPassword
+        }, 
+        {
+           headers: {
+            Authorization: `Bearer ${token}`,
+            },
+        });
+        toast.success(response.data.msg);
+        
+        //if we provide new first name than we have to update our setFirstName with new first name
+        if (newFirstName) {
+          setfirstName(newFirstName);
+          setNewFirstName("");
+        }
+    } 
+    catch (error) {
+        toast.error(error.response?.data?.msg || "Something went wrong");
+    }
   }
 
   return (
