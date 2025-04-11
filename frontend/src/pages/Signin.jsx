@@ -3,6 +3,8 @@ import { MyContext } from '@/context/MyContext';
 import React, { useContext, useState } from 'react'
 import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
+import { toast } from 'react-toastify';
+import axios from 'axios';
 
 const Signin = () => {
   const [formData , setFormData] = useState({
@@ -33,10 +35,46 @@ const Signin = () => {
     ))
   }
   
-  const handleSubmit = () => {
+    //handle submit 
+    const handleSubmit = async () =>{
+      const result = signinValidation.safeParse(formData);
+      
+      //if validation failed
+      if(!result.success){
+        const formattedErrors = result.error.flatten().fieldErrors;
+        setErrors(formattedErrors);
+        return;
+      }
   
-  }
+      //if validation succeed then send post req for login to backend server \
+      try {
+        setErrors({});
+        const response = await axios.post(`${import.meta.env.VITE_URL}/api/v1/user/signin`,
+          JSON.stringify(formData),
+          {
+            headers: {"Content-Type" : "application/json"} 
+          }
+        )
   
+        //if token exist then put token in localstorage and navigate to dashboard
+        const token = response.data.token;
+        if(token){
+          localStorage.setItem('token', response.data.token);
+          await fetchData();
+          await fetchUsers();
+          toast.success(response.data.msg)
+          navigate('/dashboard');
+        } 
+        else {
+          toast(response.data.msg)
+      }
+    }
+    catch (error) {
+      toast.error(error.response.data.error || error.response.data.msg);
+    }
+  }  
+
+
   return (
     <div className='className="mt-10 mb-20 sm:mx-8"'>
       <div className="flex  justify-center gap-3 max-w-[90%] lg:max-w-[70%] mx-auto rounded-lg shadow-lg">
