@@ -69,8 +69,8 @@ const Header = () => {
           </div>
          ) : (
           <>
-            <Button onClick={() => navigate("/signin")} className="font-[poppins] sm:text-xl sm:p-5 text-center">Login </Button>
-            <Button onClick={() => navigate("/signup")} className="font-[poppins] sm:text-xl sm:p-5 text-center" > Singup </Button>
+            <Button onClick={() => navigate("/signin")} className="cursor-pointer font-[poppins] sm:text-xl sm:p-5 text-center">Login </Button>
+            <Button onClick={() => navigate("/signup")} className="cursor-pointer font-[poppins] sm:text-xl sm:p-5 text-center" > Singup </Button>
           </>
          )}
         </div>
