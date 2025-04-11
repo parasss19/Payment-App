@@ -30,7 +30,7 @@ const AllUsers = () => {
             </div>
           ))
         ) :
-         <h1>No uesr found</h1>
+         <h1 className='font-[poppins] text-red-600 text-sm flex justify-center my-4'>No uesr found</h1>
         }
     </div>
   )
