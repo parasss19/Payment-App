@@ -1,5 +1,6 @@
 import { MyContext } from '@/context/MyContext';
-import React, { useContext, useState } from 'react'
+import axios from 'axios';
+import React, { useContext, useEffect, useState } from 'react'
 import { AiOutlineCloseCircle } from "react-icons/ai";
 import { FcSearch } from "react-icons/fc";
 
@@ -25,6 +26,10 @@ const Filter = () => {
       setQuery("");
     } 
   }
+  //load all users when component mount first time(when user navigate to dashboard)
+  useEffect(() => {
+    fetchUsers()
+  },[])
 
 
   return (
@@ -36,6 +41,7 @@ const Filter = () => {
           value={query}
           className='w-full py-3 pl-3 text-xl outline-none '
           onChange={(e) => setQuery(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && searching()}
         />
 
         {/* Cross icon remove query */}
@@ -46,7 +52,10 @@ const Filter = () => {
         )}
 
         {/* Search button */}
-        <button onClick={searching} className=" bg-red-400 px-2 py-2 rounded-tr rounded-br cursor-pointer">
+        <button 
+          onClick={searching} 
+          className=" bg-red-400 px-2 py-2 rounded-tr rounded-br cursor-pointer"
+          >
           <FcSearch size={35} className="-scale-x-100" />
         </button>
     </div>
