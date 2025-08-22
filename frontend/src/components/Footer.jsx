@@ -4,7 +4,7 @@ import logo from '../assets/logo.png'
 
 const Footer = () => {
   return (
-    <div className="container">
+    <div className="container pb-2">
       
       <div className=" flex flex-col p-4 bg-gray-50 border border-gray-300 rounded-lg">
         <div className="flex flex-col gap-4 justify-around items-center sm:flex-row sm:gap-0">
