@@ -3,12 +3,13 @@ import BentoCards from '../components/BentoCards'
 import { motion } from "framer-motion";
 import { useNavigate } from 'react-router-dom';
 import { Sparkles, Zap } from 'lucide-react';
-import funds from '../assets/funds.png'
-import signup from '../assets/signup.png'
-import transaction from '../assets/transaction.png'
-import { FaArrowRight, FaArrowRightArrowLeft } from 'react-icons/fa6';
-import { IoThunderstorm } from 'react-icons/io5';
-import zap from '../assets/lightning.png'
+import funds from '../assets/funds.webp'
+import signup from '../assets/signup.webp'
+import transaction from '../assets/transaction.webp'
+import { FaArrowRight } from 'react-icons/fa6';
+import heroImg from '../assets/PayEasy.webp'
+import zap from '../assets/lightning.webp'
+import { ArcadeEmbed } from '@/components/ArcadeEmbed';
 
 
 const HomePage = () => {
@@ -87,14 +88,20 @@ const HomePage = () => {
             worldwide 🌍
           </p>
 
-          {/* Product Preview Image */}
-          <div className="mt-10 flex justify-center items-center max-w-[95%] sm:max-w-[90%] md:max-w-[85%] mx-auto">
+          {/* Product Preview video */}
+          {/* <div className="mt-10 flex justify-center items-center max-w-[95%] sm:max-w-[90%] md:max-w-[85%] mx-auto">
             <img
-              src="PayEasy.png"
+              src={heroImg}
               alt="Dashboard preview"
               className="rounded-2xl shadow-lg w-full border border-gray-100"
             />
+          </div> */}
+
+          {/* Product Preview demo video */}
+          <div className="mt-12 flex justify-center items-center w-full max-w-[95%] sm:max-w-[95%] md:max-w-[90%] mx-auto">
+            <ArcadeEmbed />
           </div>
+
         </div>
       </motion.div>
 
