@@ -1,67 +1,140 @@
 import { createContext, useEffect, useState } from "react";
 import axios from 'axios';
 
+
 export const MyContext = createContext();
 
 const MyProvider = ({children}) => {
-  const [user, setUser] = useState(false);
+  axios.defaults.withCredentials = true;
+
+  //backend url
+  const backendURL = import.meta.env.VITE_BACKEND_URL;
+
+  const [isAuthenticated, setIsAuthenticated] = useState(false);   //track login state
+  const [userData, setUserData] = useState(null);     //full user info from backend
+  const [loading, setLoading] = useState(true);       //global loading state
   const [balance, setBalance] = useState(0);
-  const [firstName, setfirstName] = useState("");
-  const [receiverId, setreceiverId] = useState(""); 
-  const [receiverName, setreceiverName] = useState("");
-  const [allusers,setallusers] = useState()   //fetch all users to show on dashboard insitally
 
-  //fetch balance and user detials from server
-  const fetchData = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      if(!token){
-        return console.log("No token found")
-      }
-      const response = await axios.get(`${import.meta.env.VITE_URL}/api/v1/account/balance`, {
-        headers: {
-          Authorization: `Bearer ${token}`    //send token while requesting for balance and user details from server
+  //P2P and wallet transactions state
+  const [p2pTransactions, setP2pTransactions] = useState([]);
+  const [walletTransactions, setWalletTransactions] = useState([]);
+
+
+  //it provide use userInfo and user's authentication status
+  const getAuthState = async () => {
+      try {
+        const {data} = await axios.get(`${backendURL}/api/v1/auth/isAuth`,{ withCredentials: true,}) 
+
+        if(data.success){
+          setUserData(data.user);   //my backend 'userAuth' middleware return 'user' obj which contain { _id, username, firstName, lastName, balance, pin ... }
+          setIsAuthenticated(true);
         }
-      })
-      console.log(response);
+        else{
+          setUserData(null);
+          setIsAuthenticated(false);
+        }
+      } 
+      catch (error) {
+        setIsAuthenticated(false);
+        setUserData(null);
+        //console.log(error.message);
+      } 
+      finally{
+        setLoading(false);
+      }
+  } 
+
+  //fetch balance
+  const fetchBalance = async () => {
+    try {
+      const response = await axios.get(`${backendURL}/api/v1/account/balance`, { withCredentials:true })
       setBalance(response.data.balance);
-      setfirstName(response.data.firstName);
-      setUser(true);
-    } catch (error) {
-      console.error("Error fetching data:", error);
+    } 
+    catch (error) {
+      setBalance(0); //fallback
+      //console.error("Error fetching data:", error.response?.data || error.message);
     }
   }
 
-  //Fetch all users
-  const fetchUsers = async () => {
+  //fetch p2ptransactions
+  const fetchP2pTransactions = async() => {
     try {
-      const token = localStorage.getItem('token');
-      if(!token){
-        return console.log("No token found")
+      const {data} = await axios.get(`${backendURL}/api/v1/account/p2pTransactions`, { withCredentials:true });
+      if(data.success){
+        setP2pTransactions(data.transactions);
+      }else {
+        //console.warn("Failed to fetch P2P transactions:", data.message);
+        setP2pTransactions([]);
       }
-      const response = await axios.get(`${import.meta.env.VITE_URL}/api/v1/user/filterUser`,{
-        headers: {
-          Authorization: `Bearer ${token}`    //send token while requesting for balance from server
-        }
-      })
-      //console.log(response);
-      setallusers(response.data.allusers);
-    } catch (error) {
-      console.error("Error fetching users:", error);
+    } 
+    catch (error) {
+      setP2pTransactions([]);
+      //console.error("Error fetching P2P transactions:", error.response?.data || error.message);
     }
   }
 
+  //fetch walletTransactions
+  const fetchWalletTransactions = async() => {
+    try {
+      const {data} = await axios.get(`${backendURL}/api/v1/account/walletTransactions`, {withCredentials: true} );
+      if(data.success){
+        setWalletTransactions(data.transactions);
+      } 
+      else {
+        //console.warn("Failed to fetch wallet transactions:", data.message);
+        setWalletTransactions([]);
+      }
+    } catch (error) {
+        //console.error("Error fetching wallet transactions:", error.response?.data || error.message);
+        setWalletTransactions([]);
+    }
+  }
 
-  // Fetch data when the component mounts
+  
   useEffect(() => {
-    fetchData();
-    fetchUsers();
-   }, []);
+    getAuthState();
+    fetchBalance();
+    fetchP2pTransactions();
+    fetchWalletTransactions();
+  }, []);
+
+  //Whenever user changes, reset old state
+  useEffect(() => {
+    //logout or unauthenticated
+    if (!userData) {
+      setBalance(0);
+      setP2pTransactions([]);
+      setWalletTransactions([]);
+    } 
+    //authenticated → fetch fresh data
+    else {
+      fetchBalance();
+      fetchP2pTransactions();
+      fetchWalletTransactions();
+    }
+  }, [userData]);
+
 
   return(
     <MyContext.Provider value = {{
-      user, setUser, firstName, setfirstName, balance, setBalance, receiverId, setreceiverId, receiverName, setreceiverName,
-      allusers, setallusers, fetchData, fetchUsers
+      backendURL, 
+      loading, 
+
+      //Authentication
+      isAuthenticated, setIsAuthenticated, 
+      userData, setUserData,
+      getAuthState,
+      
+      //Balance
+      balance, setBalance, 
+      fetchBalance, 
+
+      //transactions
+      walletTransactions,
+      fetchWalletTransactions,
+      
+      p2pTransactions,
+      fetchP2pTransactions
     }}>
       {children}
     </MyContext.Provider>
