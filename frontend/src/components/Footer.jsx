@@ -1,6 +1,6 @@
 import { FaGithub, FaLinkedinIn, FaXTwitter } from "react-icons/fa6";
 import { Link } from 'react-router-dom';
-import logo from '../assets/logo.png'
+import logo from '../assets/logo.webp'
 
 const Footer = () => {
   return (
