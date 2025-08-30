@@ -1,86 +1,224 @@
-import { MyContext } from '@/context/MyContext';
-import React, { useContext, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { Button } from './ui/button';
-import { DropdownMenu, DropdownMenuContent,DropdownMenuItem,DropdownMenuTrigger} from "./ui/dropdown-menu";
-import { CircleUser, HomeIcon, LogOut } from 'lucide-react';
-import { toast } from "react-toastify";
+import { MyContext } from "@/context/MyContext";
+import React, { useContext, useEffect, useRef, useState } from "react";
+import { Link, useNavigate, NavLink } from "react-router-dom";
+
+import {
+  ArrowLeftRight,
+  IndianRupee,
+  LayoutDashboard,
+  LogOut,
+  Wallet,
+} from "lucide-react";
 import UpdateInfo from './UpdateInfo';
+import logo from "../assets/logo.webp";
+import toast from "react-hot-toast";
+import { MdUpdate } from "react-icons/md";
+import axios from "axios";
+
 
 const Header = () => {
-  const [showupdateinfo, setshowupdateinfo] = useState(false);    //used for showing update info modal
+  const { userData, setUserData, isAuthenticated, setIsAuthenticated, backendURL, setBalance} = useContext(MyContext);
   const navigate = useNavigate();
-  const { user, setUser, firstName } = useContext(MyContext);
+  
+  const [showUpdateInfo, setShowUpdateInfo] = useState(false);    //used for showing update info modal
+  const [isOpen, setIsOpen] = useState(false);
+
+  //used for closing usermenu when click outside
+  const MenuRef = useRef(null);
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (MenuRef.current && !MenuRef.current.contains(e.target)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const logoutHandler = async () => {
+    try {
+      axios.defaults.withCredentials = true;
+      const { data } = await axios.post(`${backendURL}/api/v1/auth/logout`);
+      
+      if (data.success) {
+        setIsAuthenticated(false);
+        setUserData(null);
+        setBalance(0);
+        navigate("/");
+        toast.success("Logged Out");
+      }
+    } 
+    catch (error) {
+      toast.error(error.message);
+    }
+  };
+
+  const navLinks = [
+    { name: "Add Funds", path: "/addFunds" },
+    { name: "Transactions", path: "/transactions" },
+    { name: "P2P Transfer", path: "/p2ptransfer" },
+  ];
 
   return (
-    <div className='"bg-white/95 "'>
-      
-      <nav className='py-2 flex justify-between items-center'>
-        {/* Logo */}
-        <Link to="/" className="flex justify-center items-center gap-2">
-          <img src="/logo-modified.png" alt="logo" className="w-10 h-10 md:w-14 md:h-14" />
-          <span className="font-bold font-[poppins] text-lg md:text-2xl"> PayEasy </span>
-        </Link>
+    <>
+      {isAuthenticated ? (
+        <nav className="flex items-center justify-between">
+          {/* Logo */}
+          <Link
+            to="/dashboard"
+            className="flex justify-center items-center gap-2"
+          >
+            <img src={logo} alt="logo" className="w-8 h-8 md:w-12 md:h-12" />
+            <span className="font-bold font-[poppins] text-lg md:text-2xl">
+              PayEasy{" "}
+            </span>
+          </Link>
 
-        {/* Buttons or Drop Down */}
-        <div className="flex gap-2">
-         {user ? (
-          <div className='flex justify-center items-center gap-3'>
-            <Button
-              onClick = {() => navigate('/dashboard')}
-              className="cursor-pointer font-[poppins] px-2 py-0 sm:px-3 sm:py-3 sm:text-xl font-semibold"
-            >
-              Dashboard
-            </Button>
-
-            <DropdownMenu>
-              <DropdownMenuTrigger className='bg-gray-400 rounded-full px-3 py-1 sm:px-4 sm:py-2'>
-                <span className='cursor-pointer sm:text-2xl font-[poppins] font-semibold'>
-                  {firstName.charAt(0)}
-                </span>
-              </DropdownMenuTrigger>
-
-              <DropdownMenuContent className='mr-3'>
-                <DropdownMenuItem className="cursor-pointer">
-                  <HomeIcon className="mr-2 h-4 w-4" />
-                    <span onClick={() => navigate("/")}> Home </span>
-                </DropdownMenuItem>
-
-                <DropdownMenuItem onClick={() => setshowupdateinfo(true)} className="cursor-pointer">
-                  <CircleUser className="mr-2 h-4 w-4" />
-                  <span > Update Info</span>
-                </DropdownMenuItem>
-
-                <DropdownMenuItem className="cursor-pointer text-red-400">
-                  <LogOut className="mr-2 h-4 w-4" />
-                  <Link
-                    onClick={async () => {
-                      localStorage.clear();
-                      toast.success("Logged Out Successfully");
-                      setUser(false);
-                      navigate("/");
-                    }}
-                  >
-                    Logout
-                  </Link>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+          {/* nav links */}
+          <div className="hidden sm:flex gap-8 items-center font-[poppins]">
+            {navLinks.map((link) => (
+              <NavLink
+                key={navLinks.path}
+                to={link.path}
+                className={({ isActive }) => `relative group text-gray-700 font-medium text-base transition-colors hover:text-gray-800 ${isActive ? "text-gray-900" : "" }` }
+              >
+                {({ isActive }) => (
+                  <>
+                    {link.name}
+                    <span
+                      className={`absolute left-0 -bottom-1 h-[1.5px] bg-gray-800 transition-all ${
+                        isActive ? "w-full" : "w-0 group-hover:w-full"
+                      }`}
+                    ></span>
+                  </>
+                )}
+              </NavLink>
+            ))}
           </div>
-         ) : (
-          <>
-            <Button onClick={() => navigate("/signin")} className="cursor-pointer font-[poppins] sm:text-xl sm:p-5 text-center">Login </Button>
-            <Button onClick={() => navigate("/signup")} className="cursor-pointer font-[poppins] sm:text-xl sm:p-5 text-center" > Singup </Button>
-          </>
-         )}
-        </div>
-      </nav>
 
-      {/* Update Dialog modal rendered */}
-      <UpdateInfo showupdateinfo={showupdateinfo} setshowupdateinfo={setshowupdateinfo} />
+          {/* User profile*/}
+          <div
+            ref={MenuRef}
+            onClick={() => setIsOpen(!isOpen)}
+            className="bg-black/85 text-white w-fit px-3 py-1 rounded-full flex justify-center items-center cursor-pointer"
+          >
+            {/* Avatar */}
+            <span className="font-[Geist] font-bold text-center text-xl">
+              {userData?.firstName.charAt(0)?.toUpperCase() ||
+                userData?.username.charAt(0)?.toUpperCase()}
+            </span>
 
-    </div>
-  )
-}
+            {/* Drop Down */}
+            {isOpen && (
+              <div className="absolute top-14 md:top-15 right-2 z-30 text-black font-[outfit]">
+                <ul className="max-w-36 flex flex-col items-center list-none px-2 py-2 text-white backdrop-blur-sm bg-black/50 rounded">
+                  {/* always visible in drop down*/}
+                  <li
+                    onClick={() => {
+                      navigate("/dashboard");
+                      setIsOpen(false);
+                    }}
+                    className="text-sm flex items-center gap-2 hover:bg-white/20 rounded px-2 py-2 w-full"
+                  >
+                    <LayoutDashboard className="w-5 h-5" />
+                    Dashboard
+                  </li>
 
-export default Header
+                  {/* Only visible in drop-down when screens size < 645px */}
+                  <li
+                    onClick={() => {
+                      navigate("/addFunds");
+                      setIsOpen(false);
+                    }}
+                    className="text-sm flex gap-2 hover:bg-white/20 rounded px-2 py-2 w-full sm:hidden"
+                  >
+                    <Wallet className="w-5 h-5" />
+                    Add Funds
+                  </li>
+
+                  <li
+                    onClick={() => {
+                      navigate("/transactions");
+                      setIsOpen(false);
+                    }}
+                    className="text-sm flex items-center gap-2 hover:bg-white/20 rounded px-2 py-2 w-full sm:hidden"
+                  >
+                    <IndianRupee className="w-5 h-5 shrink-0" />
+                    Transactions
+                  </li>
+
+                  <li
+                    onClick={() => {
+                      navigate("/p2ptransfer");
+                      setIsOpen(false);
+                    }}
+                    className="text-sm flex items-center gap-2 hover:bg-white/20 rounded px-2 py-2 w-full  sm:hidden"
+                  >
+                    <ArrowLeftRight className="w-5 h-5" />
+                    P2P Transfer
+                  </li>
+
+                  {/* line */}
+                  <div className="border my-1 w-full"></div>
+
+                  {/* Always visible links in drop-down */}
+
+                  {/* Update Dialog modal rendered */}
+                  <li
+                    onClick={() => {
+                      setShowUpdateInfo(true);
+                      setIsOpen(false);
+                    }}
+                    className="text-sm flex items-center gap-2 hover:bg-white/20 rounded px-2 py-2 w-full"
+                  >
+                    <MdUpdate className="w-6 h-6" />
+                    Update Info
+                  </li>
+
+                  <li
+                    onClick={logoutHandler}
+                    className="text-sm flex items-center gap-2 hover:bg-white/20 rounded px-2 py-2 w-full"
+                  >
+                    <LogOut className="w-5 h-5" />
+                    Logout
+                  </li>
+                </ul>
+              </div>
+            )}
+          </div>
+        </nav>
+      ) : (
+        <nav className="flex items-center justify-between">
+          {/* Logo */}
+          <Link to="/" className="flex justify-center items-center gap-2">
+            <img src={logo} alt="logo" className="w-8 h-8 md:w-12 md:h-12" />
+            <span className="font-bold font-[poppins] text-lg md:text-2xl">
+              {" "}
+              PayEasy{" "}
+            </span>
+          </Link>
+
+          {/* Button(Login/Signup) */}
+          <div className="font-[Geist]">
+            <button
+              onClick={() => navigate("/auth")}
+              className="cursor-pointer bg-cyan-800 hover:bg-cyan-700 text-white font-[Geist] font-semibold text-sm sm:text-lg px-3 py-2 sm:px-4 sm:py-2 rounded-lg shadow-md transition-transform duration-150 active:scale-95"
+            >
+              Signup
+            </button>
+          </div>
+        </nav>
+      )}
+
+      {/* For opening updateinfo modal */}
+      {showUpdateInfo && (
+        <UpdateInfo showUpdateInfo={showUpdateInfo} setShowUpdateInfo={setShowUpdateInfo} />
+      )}
+      
+    </>
+  );
+};
+
+export default Header;
