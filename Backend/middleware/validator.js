@@ -1,4 +1,5 @@
 import {z} from 'zod';
+// import { receiver } from '../controllers/accountControllers.js';
 
 //zod schema for different routes
 const signupValidation = z.object({
@@ -18,6 +19,12 @@ const updateValidation = z.object({
   newPassword: z.string().trim().optional(),
   newusername: z.string().trim().email("Invalid email").optional()
     .or(z.literal("")), //allow empty string for username(email) without failing
+});
+
+const moneyTransferValidaton = z.object({
+  receiverId: z.string().min(1, "Receiver ID is required").trim(),
+  amount: z.number().gt(0, { message: "Amount must be greater than 0" }),
+  pin: z.string().min(4, "Pin is required"),
 });
 
 
@@ -48,3 +55,4 @@ const createValidator = (schema) => (req, res, next) => {
 export const validateRegister = createValidator(signupValidation);
 export const validateLogin = createValidator(signinValidation);
 export const validateUpdate = createValidator(updateValidation);
+export const validateTransfer = createValidator(moneyTransferValidaton);
