@@ -75,7 +75,7 @@ const AuthPage = () => {
         : { username: formData.username, password: formData.password };
       
       //api call     
-      await axios.post(endpoint, payload);
+      await axios.post(endpoint, payload, {withCredentials:true});
 
       if(state === "Sign Up") {
         setIsAuthenticated(true);
