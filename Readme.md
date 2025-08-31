@@ -1,27 +1,38 @@
 # PayEasy 💸
 
 <div id="top" align="center">
- <img src="https://res.cloudinary.com/dxxeks4o5/image/upload/v1744698767/0FEA8AD7-EF62-454B-B258-0D0F6AB166A5_dac1pt.png" alt="logo"/>
+ <img src="https://res.cloudinary.com/dxxeks4o5/image/upload/v1756624919/image_5_morwwi.png" alt="logo"/>
 </div>
 
 ## Now transfer money 💸 hassle free with PayEasy
 ### 🎯 Aim:
-- To provide a simple and secure web-based platform where users can send money to each other seamlessly, simulating real-time digital transactions.
+To provide a **simple, secure, and user-friendly platform** where users can:  
+- Send & receive money seamlessly  
+- Add funds to their wallet via payment gateway (Razorpay)  
+- Track their transaction history in real-time  
+
+---
 
 ### 🥅 Goal:
-- To build a fully functional peer-to-peer money transfer system with user authentication, real-time balance updates, and robust backend transaction handling—ideal as a prototype for fintech solutions.
-
+To build a **fully functional peer-to-peer money transfer system** with:  
+- **JWT authentication (cookies-based)** for security  
+- **Real-time wallet balance updates**  
+- **P2P and wallet transaction history** for complete transparency  
+- **Robust backend transaction handling** with MongoDB transactions  
+- A reliable **prototype for fintech solutions** like Paytm/PhonePe wallets
+  
 <br>
 
 ## 🚀 Features
-
-- 🔐 **JWT Authentication**: Secure signup and signin with protected routes.
-- 💰 **Artificial Wallet Funding**: Users receive an initial balance (₹2000–₹10000) upon registration.
-- 📋 **Dashboard View**: Real-time balance display, user list, and profile management modal.
-- 🔎 **Search Functionality**: Easily search users to send money.
-- 💸 **Send Money Page**: Transfer balance using MongoDB transactions to ensure atomicity.
-- 🧾 **User Profile Management**: Update user details via a modal.
-- 🔓 **Logout**: Securely end sessions and redirect to signin page.
+- 🔐 **JWT Authentication** – Secure signup & signin with protected routes (cookies-based).  
+- ➕ **Add Funds to Wallet** – Seamlessly add money using Razorpay integration.  
+- 📋 **Dashboard View** – Real-time balance display, user list, and profile management modal.  
+- 🔎 **Search Functionality** – Quickly find users to send money.  
+- 💸 **Send Money Page** – Transfer balance using MongoDB transactions to ensure atomicity.  
+- 🧾 **Transaction History** –  
+  - View **P2P transactions history**  
+  - View **Add Funds transactions history**  
+- 👤 **User Profile Management** – Update user details via a modal.  
 
   <br>
 
@@ -46,10 +57,6 @@
 <br>
 
 # Getting Started
-### Prerequisites
-- Node.js (v14 or higher)
-- npm (v6 or higher)
-- Vite
 
 ## Installation
 1. **Clone the repository**
@@ -86,6 +93,7 @@
    PORT = 3000
    JWT_SECRET = "YOUR JWT SECRET KEY"
    MONGO_URI = "YOUR MONGO DB CLUSTER CONNECTION STRING"
+   FRONTEND_URL="http://localhost:5173"
    ```
 
 2. **Start the backend server**:
